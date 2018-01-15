@@ -55,6 +55,10 @@ namespace nemesis
                             {
                                 OutPut.Items.Add(new ListViewItem(new String[] { line + _ext, myHttpWebResponse.StatusDescription }));
                             }
+                            else if (myHttpWebResponse.StatusCode == HttpStatusCode.MovedPermanently)
+                            {
+                                OutPut.Items.Add(new ListViewItem(new String[] { line + _ext, myHttpWebResponse.StatusDescription }));
+                            }
                             myHttpWebResponse.Close();
                         }
                         catch { }
