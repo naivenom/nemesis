@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -26,7 +26,7 @@ namespace nemesis
         }
         Thread myThread = null;
 
-        public void _fuzzingDirFich(string _host, string _path, string _port, string _ext)
+        public void _fuzzingFic(string _host, string _path, string _port, string _ext)
         {
             int port = Int32.Parse(_port);
             
@@ -45,37 +45,64 @@ namespace nemesis
                     try
                     {
                         sock.Connect(hostRemoto);
-                        try
+                        if (fuzzingFic.Checked == true)
                         {
-                            HttpWebRequest myHttpWebRequest = (HttpWebRequest)WebRequest.Create("http://" + _host + "/"+ line + _ext);
-                            myHttpWebRequest.AllowAutoRedirect = false;
-                            HttpWebResponse myHttpWebResponse = (HttpWebResponse)myHttpWebRequest.GetResponse();
+                            try
+                            {
+                                HttpWebRequest myHttpWebRequest = (HttpWebRequest)WebRequest.Create("http://" + _host + "/" + line + _ext);
+                                myHttpWebRequest.AllowAutoRedirect = false;
+                                HttpWebResponse myHttpWebResponse = (HttpWebResponse)myHttpWebRequest.GetResponse();
 
-                            if (myHttpWebResponse.StatusCode == HttpStatusCode.OK)
-                            {
-                                OutPut.Items.Add(new ListViewItem(new String[] { line + _ext, myHttpWebResponse.StatusDescription }));
+                                if (myHttpWebResponse.StatusCode == HttpStatusCode.OK)
+                                {
+                                    OutPut.Items.Add(new ListViewItem(new String[] { line + _ext, myHttpWebResponse.StatusDescription }));
+                                }
+                                else if (myHttpWebResponse.StatusCode == HttpStatusCode.MovedPermanently)
+                                {
+                                    OutPut.Items.Add(new ListViewItem(new String[] { line + _ext, myHttpWebResponse.StatusDescription }));
+                                }
+                                else if (myHttpWebResponse.StatusCode == HttpStatusCode.Forbidden)
+                                {
+                                    OutPut.Items.Add(new ListViewItem(new String[] { line + _ext, myHttpWebResponse.StatusDescription }));
+                                }
+                                myHttpWebResponse.Close();
                             }
-                            else if (myHttpWebResponse.StatusCode == HttpStatusCode.MovedPermanently)
-                            {
-                                OutPut.Items.Add(new ListViewItem(new String[] { line + _ext, myHttpWebResponse.StatusDescription }));
-                            }
-                            else if (myHttpWebResponse.StatusCode == HttpStatusCode.Forbidden)
-                            {
-                                OutPut.Items.Add(new ListViewItem(new String[] { line + _ext, myHttpWebResponse.StatusDescription }));
-                            }
-                            myHttpWebResponse.Close();
+                            catch { }
                         }
-                        catch { }
+                        else if (fuzzingDir.Checked == true)
+                        {
+                            try
+                            {
+                                HttpWebRequest myHttpWebRequest = (HttpWebRequest)WebRequest.Create("http://" + _host + "/" + line);
+                                myHttpWebRequest.AllowAutoRedirect = false;
+                                HttpWebResponse myHttpWebResponse = (HttpWebResponse)myHttpWebRequest.GetResponse();
+
+                                if (myHttpWebResponse.StatusCode == HttpStatusCode.OK)
+                                {
+                                    OutPut.Items.Add(new ListViewItem(new String[] { line, myHttpWebResponse.StatusDescription }));
+                                }
+                                else if (myHttpWebResponse.StatusCode == HttpStatusCode.MovedPermanently)
+                                {
+                                    OutPut.Items.Add(new ListViewItem(new String[] { line, myHttpWebResponse.StatusDescription }));
+                                }
+                                else if (myHttpWebResponse.StatusCode == HttpStatusCode.Forbidden)
+                                {
+                                    OutPut.Items.Add(new ListViewItem(new String[] { line, myHttpWebResponse.StatusDescription }));
+                                }
+                                myHttpWebResponse.Close();
+                            }
+                            catch { }
+                        }
 
                     }
                     catch  { }
                 
                 }
-                progressBar1.Value += 1;
+                progressBar1.Value ++;
             }
             label1.Text = "Realizado con exito!";
             int _contador = OutPut.Items.Count;
-            MessageBox.Show("Escaneo realizado!\nEncontrados " + _contador.ToString() + " ficheros.", "Hecho", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Escaneo realizado!\nEncontrados " + _contador.ToString() + " ficheros o directorio.", "Hecho", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
 
@@ -95,9 +122,9 @@ namespace nemesis
             }
             else
             {
-                if (fuzzingDirFic.Checked)
+                if (fuzzingFic.Checked)
                 {
-                    myThread = new Thread(() => _fuzzingDirFich(ipAddress.Text,pathDicc.Text, Port.Text, ext.Text));
+                    myThread = new Thread(() => _fuzzingFic(ipAddress.Text,pathDicc.Text, Port.Text, ext.Text));
                     myThread.Start();
 
                     if (myThread.IsAlive == true)
@@ -107,7 +134,19 @@ namespace nemesis
                         ipAddress.Enabled = false;
                     }
                 }
-                
+                if (fuzzingDir.Checked)
+                {
+                    myThread = new Thread(() => _fuzzingFic(ipAddress.Text, pathDicc.Text, Port.Text, ext.Text));
+                    myThread.Start();
+
+                    if (myThread.IsAlive == true)
+                    {
+                        stop.Enabled = true;
+                        scan.Enabled = false;
+                        ipAddress.Enabled = false;
+                    }
+                }
+
 
             }
         }
@@ -123,6 +162,11 @@ namespace nemesis
         }
 
         private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
         {
 
         }
